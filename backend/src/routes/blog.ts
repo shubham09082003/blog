@@ -16,8 +16,7 @@ export const blogRouter = new Hono<{
 
 blogRouter.use('/*', async (c, next) => {
     const header = c.req.header("authorization") || "";
-    const token = header.split(" ")[1];
-    const response = await verify(token , c.env.JWT_SECRET);
+    const response = await verify(header, c.env.JWT_SECRET);
     if(response.id){
       c.set('userId',response.id);
       await next();
@@ -138,36 +137,38 @@ blogRouter.get('/:id', async (c)=>{
       })
     }
   
-  })
-  
-  
+})
+
+
+
 blogRouter.get('/bulk', async (c) => {
-    const prisma = new PrismaClient({
-      datasourceUrl: c.env.DATABASE_URL,
-    }).$extends(withAccelerate())
-  
-    try {
-      const posts = prisma.post.findMany({
-        select : {
-          content : true,
-          title : true,
-          id : true,
-          author : {
-            select : {
-              name : true
-            }
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate())
+
+
+  try{
+    const blogs = await prisma.post.findMany({
+      select : {
+        content : true,
+        title : true,
+        id : true,
+        author : {
+          select : {
+            name : true
           }
         }
-      })
-      return c.json({
-        posts
-      })
-    }
-    catch(e){
-      c.status(403);
-      return c.json({
-        errro : "Error while fetching post"
-      });
-    }
-    
-  })
+      }
+    })
+    c.status(200);
+    c.json({
+      blogs
+    });
+  }
+  catch(e){
+    c.status(403);
+    c.json({
+      error : "Error while fetching" +  e
+    })
+  }
+});
