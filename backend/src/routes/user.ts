@@ -65,27 +65,28 @@ userRouter.post('/signin', async (c)=>{
   
     try{
       const body = await c.req.json();
-      const user = await prisma.user.findUnique({
-        where : {
+      const response = await prisma.user.findUnique({
+        where: {
           username : body.username,
-          password : body.password
         },
       });
+      console.log(response);
   
-      if(!user){
+      if(!response){
         return c.json({
           error : "User not found"
         });
       }
       else{
-        const token = sign({id : user.id}, c.env.JWT_SECRET);
+        const token = await sign({ id : response.id }, c.env.JWT_SECRET);
         return c.json({
           jwt : token
         });
       }
     }
     catch(e){
-      c.json(403);
+      c.status(403);
+      console.log(e);
       return c.json({
         error : "Error while sign In"
       })

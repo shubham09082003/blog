@@ -4,7 +4,8 @@ import { BlogSkeleton } from "../components/BlogSekeleton";
 import { useBlogs } from "../hooks";
 
 export const Blogs = () => {
-    const { loading, posts } = useBlogs();
+    const { loading , posts } = useBlogs();
+    console.log(typeof(posts));
 
     if (loading) {
         return <div>
@@ -25,13 +26,17 @@ export const Blogs = () => {
         <Appbar />
         <div  className="flex justify-center">
             <div>
-                {posts.map(blog => <BlogCard
+                {posts.map((blog) => (
+                    <BlogCard
+                    key={blog.id}
                     id={blog.id}
                     authorName={blog.author.name || "Anonymous"}
                     title={blog.title}
                     content={blog.content}
                     publishedDate={"11th Nov 2024"}
-                />)}
+                />
+                ))
+                }
             </div>
         </div>
     </div>
